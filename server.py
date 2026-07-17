@@ -1,19 +1,32 @@
 import os
 from datetime import datetime
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
-WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK_URL')
-NOTIFY_MODE = os.getenv('NOTIFY_MODE', 'terminal').lower()
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+# Permite apenas o frontend hospedado na Vercel
+CORS(
+    app,
+    resources={
+        r"/submit": {
+            "origins": [
+                "https://cltblue.vercel.app"
+            ]
+        }
+    }
+)
 
-VALID_NOTIFY_MODES = {'discord', 'terminal', 'telegram', 'both'}
+WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+NOTIFY_MODE = os.getenv("NOTIFY_MODE", "terminal").lower()
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+VALID_NOTIFY_MODES = {"discord", "terminal", "telegram", "both"}
 
 if NOTIFY_MODE not in VALID_NOTIFY_MODES:
-    raise RuntimeError(f'NOTIFY_MODE inválido: {NOTIFY_MODE}')
+    raise RuntimeError(f"NOTIFY_MODE inválido: {NOTIFY_MODE}")
 
 def valid_cpf(raw):
     cpf = ''.join(filter(str.isdigit, raw))
